@@ -1,0 +1,46 @@
+from casadi import *
+import numpy as np
+from MPC_tutorial import plot_solution
+
+def get_x_next_linear(x_current, u_current):
+    A = np.array([[1. , 0.1],
+                  [0. , 1. ]])
+    B = np.array([[0.005],
+                  [0.1  ]])
+    return A@x_current + B@u_current
+
+def get_x_total(x_hat, u, get_x_next_symbolic_func):
+    x_k = x_hat
+    x_tot = [x_k]
+    for k in range(u.shape[0]):
+        u_k = u[k]
+        x_k = get_x_next_symbolic_func(x_k, u_k)
+        x_tot.append(x_k)
+    return x_tot
+
+x_hat_numeric = np.array([[1],
+                          [1]])
+u_numeric = np.array([-10, -10, -10, 5, 5, 5, -2, -2, 2, 2, 2, 2, -1, -1, 1, 1, 1])
+
+n = 2 # state dimension
+m = 1 # control dimension
+K = len(u_numeric) # horizon
+
+# set up casadi symbolic functions
+x_current = MX.sym('x_current', n)
+u_current = MX.sym('u_current', m)
+get_x_next_symbolic_func = Function('get_x_next_symbolic_func', [x_current, u_current], [get_x_next_linear(x_current, u_current)])
+
+x_hat = MX.sym('x_hat', n)
+u = MX.sym('u', K*m)
+get_x_total_symbolic_func = Function('get_x_total_symbolic_func', [x_hat, u], get_x_total(x_hat, u, get_x_next_symbolic_func))
+
+*** FROM HERE NEXT TIME ***
+x = SX.sym('x'); y = SX.sym('y'); z = SX.sym('z')
+nlp = {'x':vertcat(x,y,z), 'f':x**2+100*z**2, 'g':z+(1-x)**2-y}
+S = nlpsol('S', 'ipopt', nlp)
+
+
+x_tot = np.array(get_x_total_symbolic_func(x_hat_numeric, u_numeric))
+
+# plot_solution(x_tot, u_numeric)
