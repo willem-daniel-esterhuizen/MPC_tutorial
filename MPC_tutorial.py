@@ -12,13 +12,13 @@ def plot_solution(x_tot, u):
     ax3 = fig.add_subplot(gs[2])
 
     # Plot state versus time
-    x_1 = [x[0] for x in x_tot]
-    x_2 = [x[1] for x in x_tot]
+    x_1 = x_tot[0]
+    x_2 = x_tot[1]
 
-    # Duplicate the initial state so we can have a nice bar plot.
+    # Duplicate the initial state so we can have a nice bar plots.
     x_1 = np.append(x_1[0], x_1)
     x_2 = np.append(x_2[0], x_2)
-    time = np.arange(len(x_tot) + 1) # because we duplicate the initial state
+    time = np.arange(x_tot.shape[1] + 1) # because we duplicate the initial state
 
     ax1.step(time, x_1, 'b-', label='Position')
     ax1.step(time, x_2, 'r-', label='Velocity')
